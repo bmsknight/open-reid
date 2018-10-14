@@ -8,6 +8,7 @@ import torch
 from torch import nn
 from torch.backends import cudnn
 from torch.utils.data import DataLoader
+from torchsummary import summary
 
 from reid import datasets
 from reid import models
@@ -88,6 +89,9 @@ def main(args):
     # Create model
     model = models.create(args.arch, num_features=args.features,
                           dropout=args.dropout, num_classes=num_classes)
+
+    print(model)
+    print(summary(model.to('cuda'), (3, 224, 224)))
 
     # Load from checkpoint
     start_epoch = best_top1 = 0
