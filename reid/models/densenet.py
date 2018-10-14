@@ -34,7 +34,7 @@ class ClassBlock(nn.Module):
         add_block += [nn.BatchNorm1d(num_bottleneck)]
         if relu:
             add_block += [nn.LeakyReLU(0.1)]
-        if dropout>0:
+        if dropout > 0:
             add_block += [nn.Dropout(dropout)]
         add_block = nn.Sequential(*add_block)
         add_block.apply(weights_init_kaiming)
@@ -63,6 +63,7 @@ class DenseNet(nn.Module):
         model_ft.fc = nn.Sequential()
         self.model = model_ft
         # For DenseNet, the feature dim is 1024
+        print (dropout)
         self.classifier = ClassBlock(num_features, num_classes, dropout=dropout)
         self.norm = norm
         self.cut_at_pooling = cut_at_pooling
@@ -74,6 +75,7 @@ class DenseNet(nn.Module):
             return x
         x = self.classifier(x)
         return x
+
 
 def densenet121(**kwargs):
     return DenseNet(**kwargs)
