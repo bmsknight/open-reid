@@ -59,7 +59,7 @@ class DenseNet(nn.Module):
                  num_features=1024, norm=False, dropout=0, num_classes=0 ):
         super(DenseNet,self).__init__()
         model_ft = models.densenet121(pretrained=pretrained)
-        model_ft.features.avgpool = nn.AdaptiveAvgPool2d((1,1))
+        model_ft.features.avgpool = nn.AdaptiveAvgPool2d((1, 1))
         model_ft.fc = nn.Sequential()
         self.model = model_ft
         # For DenseNet, the feature dim is 1024
@@ -67,6 +67,10 @@ class DenseNet(nn.Module):
         self.classifier = ClassBlock(num_features, num_classes, dropout=dropout)
         self.norm = norm
         self.cut_at_pooling = cut_at_pooling
+        self.pretrained = pretrained
+        if not self.pretrained:
+            print("params reset")
+            self.reset_params()
 
     def forward(self, x):
         x = self.model.features(x)
@@ -75,6 +79,20 @@ class DenseNet(nn.Module):
             return x
         x = self.classifier(x)
         return x
+
+    def reset_params(self):
+        for m in self.modules():
+            if isinstance(m, nn.Conv2d):
+                init.kaiming_normal(m.weight, mode='fan_out')
+                if m.bias is not None:
+                    init.constant(m.bias, 0)
+            elif isinstance(m, nn.BatchNorm2d):
+                init.constant(m.weight, 1)
+                init.constant(m.bias, 0)
+            elif isinstance(m, nn.Linear):
+                init.normal(m.weight, std=0.001)
+                if m.bias is not None:
+                    init.constant(m.bias, 0)
 
 
 def densenet121(**kwargs):
